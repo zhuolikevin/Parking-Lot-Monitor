@@ -35,26 +35,50 @@ int main(int argc, char* argv[]){
   double fps = capture.get(CV_CAP_PROP_FPS); 
   cout << "Frame per seconds : " << fps << endl;
 
-  //create a window called "MyVideo"
-  namedWindow("MyVideo",CV_WINDOW_AUTOSIZE); 
+  //create windows
+  namedWindow("Vedio",CV_WINDOW_AUTOSIZE); 
+  //namedWindow("Edges",CV_WINDOW_AUTOSIZE);
+  namedWindow("background", CV_WINDOW_AUTOSIZE);
+  namedWindow("foreground", CV_WINDOW_AUTOSIZE);
 
-  while(1){
-    Mat frame;
+  //Mat edges;
+  Mat FrameMat;
 
-    // read a new frame from video
-    bool bSuccess = capture.read(frame); 
-    if (!bSuccess){
-      cout << "Cannot read the frame from video file" << endl;
-      break;
+  // read the first frame for background detection
+  capture >> FrameMat;
+
+  Mat BkMat(FrameMat.rows, FrameMat.cols, FrameMat.depth());
+  Mat FrMat(FrameMat.rows, FrameMat.cols, FrameMat.depth());
+
+  cvtColor(FrameMat, BkMat, CV_BGR2GRAY);
+  cvtColor(FrameMat, FrMat, CV_BGR2GRAY);
+
+  while(capture.read(FrameMat)){
+
+      cvtColor(FrameMat, FrameMat, CV_BGR2GRAY);
+      absdiff(FrameMat, BkMat, FrMat);
+      imshow("Vedio", FrameMat); 
+      imshow("background", BkMat);
+      imshow("foreground", FrMat);
+
+      //wait for 'esc' key press for 30 ms. If 'esc' key is pressed, break loop
+      if(waitKey(30) == 27){
+        cout << "esc key is pressed by user" << endl; 
+        break; 
+      //}
     }
 
-    imshow("MyVideo", frame); //show the frame in "MyVideo" window
+    //cvtColor(FrameMat, edges, CV_BGR2GRAY);
 
-    //wait for 'esc' key press for 30 ms. If 'esc' key is pressed, break loop
-    if(waitKey(30) == 27){
-      cout << "esc key is pressed by user" << endl; 
-      break; 
-    }
+    //GaussianBlur(edges, edges, Size(7,7), 1.5, 1.5);
+
+
+    //
+
+    //Canny(edges, edges, 0, 30, 3);
+
+    //imshow("Edges", edges);
+    
   }
 
   return 0;
