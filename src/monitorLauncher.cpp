@@ -12,6 +12,8 @@
 #include <cxcore.h>
 #include <highgui.h>
 
+#define PI 3.1415926
+
 using namespace std;
 using namespace cv;
  
@@ -30,37 +32,97 @@ int main(int argc, char* argv[]){
     exit(0);
   }
 
-    //capture.set(CV_CAP_PROP_POS_MSEC, 300); //start the video at 300ms
+    
   //get the frames per seconds of the video
   double fps = capture.get(CV_CAP_PROP_FPS); 
   cout << "Frame per seconds : " << fps << endl;
 
   //create windows
   namedWindow("Vedio",CV_WINDOW_AUTOSIZE); 
-  //namedWindow("Edges",CV_WINDOW_AUTOSIZE);
-  namedWindow("background", CV_WINDOW_AUTOSIZE);
-  namedWindow("foreground", CV_WINDOW_AUTOSIZE);
+  namedWindow("Edges",CV_WINDOW_AUTOSIZE);
+  //namedWindow("background", CV_WINDOW_AUTOSIZE);
+  //namedWindow("foreground", CV_WINDOW_AUTOSIZE);
 
-  //Mat edges;
+  Mat EdgeMat;
   Mat FrameMat;
+  Mat BkMat;
+  Mat FrMat;
+  Mat curGrayMat;
 
   // read the first frame for background detection
   capture >> FrameMat;
 
-  Mat BkMat(FrameMat.rows, FrameMat.cols, FrameMat.depth());
-  Mat FrMat(FrameMat.rows, FrameMat.cols, FrameMat.depth());
-
   cvtColor(FrameMat, BkMat, CV_BGR2GRAY);
   cvtColor(FrameMat, FrMat, CV_BGR2GRAY);
+  GaussianBlur(BkMat, EdgeMat, Size(17,17), 1.7, 1.7);
+  Canny(EdgeMat, EdgeMat, 400, 300, 3);
+  threshold(EdgeMat, EdgeMat, 60, 255.0, CV_THRESH_BINARY);
+/*
+  vector<Vec2f> lines;  
+  //调用函数  
+  HoughLines(EdgeMat,lines,1,PI/180,80);  
+  //展示结果的图像  
+  Mat result;  
+  //EdgeMat.copyTo(result);  
+  cout<<"共检测出线："<<lines.size()<<"条"<<std::endl;  
+  //画出结果  
+  vector<Vec2f>::const_iterator it = lines.begin();  
+  while(it != lines.end()){  
+    float rho = (*it)[0];  
+    float theta=(*it)[1];  
+    if(theta < PI/4. || theta > 3. *PI / 4.){  
+        //接近于垂直线条  
+        Point pt1(rho/cos(theta),0);  
+        Point pt2((rho-EdgeMat.rows*sin(theta))/cos(theta),EdgeMat.rows);  
+        line(EdgeMat,pt1,pt2,Scalar(255),1);  
+    }else{  
+        //接近于水平线  
+        Point pt1(0,rho/sin(theta));  
+        Point pt2(EdgeMat.cols,(rho-EdgeMat.cols*cos(theta))/sin(theta));  
+        line(EdgeMat,pt1,pt2,Scalar(255),1);  
+    }  
+    ++it;  
+  }  
+*/
+  //imshow("Edges", EdgeMat);
+  //imshow("Edges", result);
 
   while(capture.read(FrameMat)){
 
-      cvtColor(FrameMat, FrameMat, CV_BGR2GRAY);
-      absdiff(FrameMat, BkMat, FrMat);
-      imshow("Vedio", FrameMat); 
-      imshow("background", BkMat);
-      imshow("foreground", FrMat);
+      cvtColor(FrameMat, curGrayMat, CV_BGR2GRAY);
+      absdiff(curGrayMat, BkMat, FrMat);
+      /*
+      vector<Vec2f>::const_iterator it = lines.begin(); 
+      while(it != lines.end()){  
+        float rho = (*it)[0];  
+        float theta=(*it)[1];  
+        if(theta < PI/4. || theta > 3. *PI / 4.){  
+          //接近于垂直线条  
+          Point pt1(rho/cos(theta),0);  
+          Point pt2((rho-EdgeMat.rows*sin(theta))/cos(theta),EdgeMat.rows);  
+          line(FrameMat,pt1,pt2,Scalar(255),1);  
+        }else{  
+          //接近于水平线  
+          Point pt1(0,rho/sin(theta));  
+          Point pt2(EdgeMat.cols,(rho-EdgeMat.cols*cos(theta))/sin(theta));  
+          line(FrameMat,pt1,pt2,Scalar(255),1);  
+        }  
+        ++it;  
+      }   
+      */
+      Point pt1(325, 368);
+      Point pt2(680, 115);
+      Point pt3(532, 460);
+      Point pt4(876, 183);
+      line(FrameMat, pt1, pt2, Scalar(255,0,0), 5);
+      line(FrameMat, pt1, pt3, Scalar(255,0,0), 5);
+      line(FrameMat, pt3, pt4, Scalar(255,0,0), 5);
+      line(FrameMat, pt2, pt4, Scalar(255,0,0), 5);
 
+      imshow("Vedio", FrameMat); 
+      //imshow("background", BkMat);
+      //imshow("foreground", FrMat);
+      
       //wait for 'esc' key press for 30 ms. If 'esc' key is pressed, break loop
       if(waitKey(30) == 27){
         cout << "esc key is pressed by user" << endl; 
@@ -70,12 +132,12 @@ int main(int argc, char* argv[]){
 
     //cvtColor(FrameMat, edges, CV_BGR2GRAY);
 
-    //GaussianBlur(edges, edges, Size(7,7), 1.5, 1.5);
+    //
 
 
     //
 
-    //Canny(edges, edges, 0, 30, 3);
+    //
 
     //imshow("Edges", edges);
     
@@ -83,94 +145,6 @@ int main(int argc, char* argv[]){
 
   return 0;
   /*
-  //声明IplImage指针
-  IplImage* pFrame = NULL; 
-  IplImage* pFrImg = NULL;
-  IplImage* pBkImg = NULL;
- 
-  CvMat* pFrameMat = NULL;
-  CvMat* pFrMat = NULL;
-  CvMat* pBkMat = NULL;
- 
-  CvCapture* pCapture = NULL;
- 
-  int nFrmNum = 0;
- 
-  //创建窗口
-  cvNamedWindow("video", 1);
-  cvNamedWindow("background",1);
-  cvNamedWindow("foreground",1);
-  //使窗口有序排列
-  cvMoveWindow("video", 30, 0);
-  cvMoveWindow("background", 360, 0);
-  cvMoveWindow("foreground", 690, 0);
- 
-  // Check for command line input
-  if(argc > 2 || argc == 1){
-    cout << "Running format:" << argv[0] << " <videoFileName>" << endl;
-    exit(0);
-  }
- 
-  // Open the video file
-  if(!(pCapture = cvCaptureFromFile(argv[1]))){
-    cout << "Cannot find video " << argv[1] << endl;
-    exit(0);
-  }
- 
-  // Read from the video frame by frame
-  while(pFrame = cvQueryFrame(pCapture)){
-    nFrmNum++;
- 
-    // Initialization for the first frame
-    if(nFrmNum == 1){
-      pBkImg = cvCreateImage(cvSize(pFrame->width, pFrame->height),  IPL_DEPTH_8U,1);
-	    pFrImg = cvCreateImage(cvSize(pFrame->width, pFrame->height),  IPL_DEPTH_8U,1);
- 
-	    pBkMat = cvCreateMat(pFrame->height, pFrame->width, CV_32FC1);
-	    pFrMat = cvCreateMat(pFrame->height, pFrame->width, CV_32FC1);
-	    pFrameMat = cvCreateMat(pFrame->height, pFrame->width, CV_32FC1);
- 
-	    //转化成单通道图像再处理
-	    cvCvtColor(pFrame, pBkImg, CV_BGR2GRAY);
-	    cvCvtColor(pFrame, pFrImg, CV_BGR2GRAY);
- 
-	    cvConvert(pFrImg, pFrameMat);
-	    cvConvert(pFrImg, pFrMat);
-	    cvConvert(pFrImg, pBkMat);
-	  }else{
-	    cvCvtColor(pFrame, pFrImg, CV_BGR2GRAY);
-	    cvConvert(pFrImg, pFrameMat);
-	    //高斯滤波先，以平滑图像
-	    //cvSmooth(pFrameMat, pFrameMat, CV_GAUSSIAN, 3, 0, 0);
- 
-	    //当前帧跟背景图相减
-	    cvAbsDiff(pFrameMat, pBkMat, pFrMat);
- 
-	    //二值化前景图
-	    cvThreshold(pFrMat, pFrImg, 60, 255.0, CV_THRESH_BINARY);
- 
-	    //进行形态学滤波，去掉噪音  
-	    //cvErode(pFrImg, pFrImg, 0, 1);
-	    //cvDilate(pFrImg, pFrImg, 0, 1);
- 
-	    //更新背景
-	    cvRunningAvg(pFrameMat, pBkMat, 0.003, 0);
-
-	    //将背景转化为图像格式，用以显示
-	    cvConvert(pBkMat, pBkImg);
- 
-	    //显示图像
-	    cvShowImage("video", pFrame);
-	    cvShowImage("background", pBkImg);
-	    cvShowImage("foreground", pFrImg);
- 
-	    //如果有按键事件，则跳出循环
-	    //此等待也为cvShowImage函数提供时间完成显示
-	    //等待时间可以根据CPU速度调整
-	    if( cvWaitKey(2) >= 0 )
-        break;
-    }
-  }
 
   //销毁窗口
   cvDestroyWindow("video");
