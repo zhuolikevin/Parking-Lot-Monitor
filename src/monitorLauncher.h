@@ -12,6 +12,7 @@
 #include <cv.h>
 #include <cxcore.h>
 #include <highgui.h>
+#include "frameHandler.h"
 
 using namespace cv;
 using namespace std;
@@ -24,7 +25,7 @@ public:
 	monitorLauncher(char* inputVideo);
 	virtual ~monitorLauncher();
 	void run();
-	bool checkSurround(Mat& inputMat, int j, int i);
+	//bool checkSurround(Mat& inputMat, int j, int i);
 };
 
 #endif  
