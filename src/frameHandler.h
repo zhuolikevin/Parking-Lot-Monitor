@@ -12,24 +12,24 @@
 #include <cv.h>
 #include <cxcore.h>
 #include <highgui.h>
+#include "motionDetector.h"
 
 using namespace cv;
 using namespace std;
 
 class frameHandler{
 private:
-	VideoCapture capture;
-	Mat FrameMat; 
-  	Mat curGrayMat;
-  	Mat bkGrayMat;
-  	Mat frGrayMat;
+  VideoCapture capture;
+  Mat FrameMat; 
+  Mat curGrayMat;
+  Mat bkGrayMat;
+  Mat frGrayMat;
 public:
-	frameHandler(VideoCapture& inputCapture);
-	//virtual ~frameHandler();
-	void handlerRun();
-	void getBackground();
-	void getForeground();
-	bool checkSurround(Mat& inputMat, int j, int i);
+  frameHandler(VideoCapture& inputCapture);
+  //virtual ~frameHandler();
+  void handlerRun();
+  void getBackground();
+  void getForeground();
 };
 
 #endif 
