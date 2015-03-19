@@ -12,8 +12,6 @@
 #include <cxcore.h>
 #include <highgui.h>
 
-#define PI 3.1415926
-
 using namespace std;
 using namespace cv;
  
@@ -32,135 +30,89 @@ int main(int argc, char* argv[]){
     exit(0);
   }
 
-    
-  //get the frames per seconds of the video
-  double fps = capture.get(CV_CAP_PROP_FPS); 
-  cout << "Frame per seconds : " << fps << endl;
-
   //create windows
   namedWindow("Vedio",CV_WINDOW_AUTOSIZE); 
-  namedWindow("Edges",CV_WINDOW_AUTOSIZE);
-  //namedWindow("background", CV_WINDOW_AUTOSIZE);
-  //namedWindow("foreground", CV_WINDOW_AUTOSIZE);
+  namedWindow("motion", CV_WINDOW_AUTOSIZE);
+  //namedWindow("next", CV_WINDOW_AUTOSIZE);
 
-  Mat EdgeMat;
-  Mat FrameMat;
-  Mat BkMat;
-  Mat FrMat;
+  Mat FrameMat; 
+  //Mat prevGrayMat;
+  //Mat nextGrayMat;
   Mat curGrayMat;
+  Mat bkGrayMat;
+  Mat frGrayMat;
+
+  Mat d1, d2, motionMat;
+
+  // Erode kernel
+  Mat kernel_ero = getStructuringElement(MORPH_RECT, Size(2,2));
 
   // read the first frame for background detection
   capture >> FrameMat;
+  cvtColor(FrameMat, bkGrayMat, CV_BGR2GRAY);
 
-  cvtColor(FrameMat, BkMat, CV_BGR2GRAY);
-  cvtColor(FrameMat, FrMat, CV_BGR2GRAY);
-  GaussianBlur(BkMat, EdgeMat, Size(17,17), 1.7, 1.7);
-  Canny(EdgeMat, EdgeMat, 400, 300, 3);
-  threshold(EdgeMat, EdgeMat, 60, 255.0, CV_THRESH_BINARY);
-/*
-  vector<Vec2f> lines;  
-  //调用函数  
-  HoughLines(EdgeMat,lines,1,PI/180,80);  
-  //展示结果的图像  
-  Mat result;  
-  //EdgeMat.copyTo(result);  
-  cout<<"共检测出线："<<lines.size()<<"条"<<std::endl;  
-  //画出结果  
-  vector<Vec2f>::const_iterator it = lines.begin();  
-  while(it != lines.end()){  
-    float rho = (*it)[0];  
-    float theta=(*it)[1];  
-    if(theta < PI/4. || theta > 3. *PI / 4.){  
-        //接近于垂直线条  
-        Point pt1(rho/cos(theta),0);  
-        Point pt2((rho-EdgeMat.rows*sin(theta))/cos(theta),EdgeMat.rows);  
-        line(EdgeMat,pt1,pt2,Scalar(255),1);  
-    }else{  
-        //接近于水平线  
-        Point pt1(0,rho/sin(theta));  
-        Point pt2(EdgeMat.cols,(rho-EdgeMat.cols*cos(theta))/sin(theta));  
-        line(EdgeMat,pt1,pt2,Scalar(255),1);  
-    }  
-    ++it;  
-  }  
-*/
-  //imshow("Edges", EdgeMat);
-  //imshow("Edges", result);
-
+  
   while(capture.read(FrameMat)){
 
-      cvtColor(FrameMat, curGrayMat, CV_BGR2GRAY);
-      absdiff(curGrayMat, BkMat, FrMat);
-      /*
-      vector<Vec2f>::const_iterator it = lines.begin(); 
-      while(it != lines.end()){  
-        float rho = (*it)[0];  
-        float theta=(*it)[1];  
-        if(theta < PI/4. || theta > 3. *PI / 4.){  
-          //接近于垂直线条  
-          Point pt1(rho/cos(theta),0);  
-          Point pt2((rho-EdgeMat.rows*sin(theta))/cos(theta),EdgeMat.rows);  
-          line(FrameMat,pt1,pt2,Scalar(255),1);  
-        }else{  
-          //接近于水平线  
-          Point pt1(0,rho/sin(theta));  
-          Point pt2(EdgeMat.cols,(rho-EdgeMat.cols*cos(theta))/sin(theta));  
-          line(FrameMat,pt1,pt2,Scalar(255),1);  
-        }  
-        ++it;  
-      }   
-      */
-      Point pt1(325, 368);
-      Point pt2(680, 115);
-      Point pt3(532, 460);
-      Point pt4(876, 183);
-      line(FrameMat, pt1, pt2, Scalar(255,0,0), 5);
-      line(FrameMat, pt1, pt3, Scalar(255,0,0), 5);
-      line(FrameMat, pt3, pt4, Scalar(255,0,0), 5);
-      line(FrameMat, pt2, pt4, Scalar(255,0,0), 5);
-
-      imshow("Vedio", FrameMat); 
-      //imshow("background", BkMat);
-      //imshow("foreground", FrMat);
-      
-      //wait for 'esc' key press for 30 ms. If 'esc' key is pressed, break loop
-      if(waitKey(30) == 27){
-        cout << "esc key is pressed by user" << endl; 
-        break; 
-      //}
+    cvtColor(FrameMat, curGrayMat, CV_BGR2GRAY);
+    absdiff(curGrayMat, bkGrayMat, frGrayMat);
+    threshold(frGrayMat, frGrayMat, 35, 255, CV_THRESH_BINARY);
+    imshow("motion", frGrayMat);
+    //imshow("next", bkGrayMat);
+    int number_of_changes = 0;
+    int min_x = motionMat.cols, max_x = 0;
+    int min_y = motionMat.rows, max_y = 0;
+    // loop over image and detect changes
+    for(int j = 0; j < motionMat.rows; j+=2){ // height
+      for(int i = 0; i < motionMat.cols; i+=2){ // width
+        // check if at pixel (j,i) intensity is equal to 255
+        // this means that the pixel is different in the sequence
+        // of images (prev_frame, current_frame, next_frame)
+        if(motionMat.at<unsigned char>(j,i) == 255){
+            number_of_changes++;
+            if(min_x>i) min_x = i;
+            if(max_x<i) max_x = i;
+            if(min_y>j) min_y = j;
+            if(max_y<j) max_y = j;
+        }
+      }
+    }
+    //cout << number_of_changes <<endl;
+    if(number_of_changes){
+      //check if not out of bounds
+      if(min_x-10 > 0) min_x -= 10;
+      if(min_y-10 > 0) min_y -= 10;
+      if(max_x+10 < motionMat.cols-1) max_x += 10;
+      if(max_y+10 < motionMat.rows-1) max_y += 10;
+      // draw rectangle round the changed pixel
+      Point x(min_x,min_y);
+      Point y(max_x,max_y);
+      Rect rect(x,y);
+      //Mat cropped = result(rect);
+      //cropped.copyTo(result_cropped);
+      rectangle(FrameMat,rect,Scalar(0,255,255),5);
     }
 
-    //cvtColor(FrameMat, edges, CV_BGR2GRAY);
+    // highlight the parking lot area
+    Point pt1(325, 368);
+    Point pt2(680, 115);
+    Point pt3(532, 460);
+    Point pt4(876, 183);
+    line(FrameMat, pt1, pt2, Scalar(255,0,0), 5);
+    line(FrameMat, pt1, pt3, Scalar(255,0,0), 5);
+    line(FrameMat, pt3, pt4, Scalar(255,0,0), 5);
+    line(FrameMat, pt2, pt4, Scalar(255,0,0), 5);
 
-    //
 
-
-    //
-
-    //
-
-    //imshow("Edges", edges);
+    imshow("Vedio", FrameMat); 
+      
+    //wait for 'esc' key press for 30 ms. If 'esc' key is pressed, break loop
+    if(waitKey(30) == 27){
+      cout << "esc key is pressed by user" << endl; 
+      break; 
+    }
     
   }
 
   return 0;
-  /*
-
-  //销毁窗口
-  cvDestroyWindow("video");
-  cvDestroyWindow("background");
-  cvDestroyWindow("foreground");
- 
-  //释放图像和矩阵
-  cvReleaseImage(&pFrImg);
-  cvReleaseImage(&pBkImg);
- 
-  cvReleaseMat(&pFrameMat);
-  cvReleaseMat(&pFrMat);
-  cvReleaseMat(&pBkMat);
- 
-  cvReleaseCapture(&pCapture);
- 
-  return 0;
-  */
 }
