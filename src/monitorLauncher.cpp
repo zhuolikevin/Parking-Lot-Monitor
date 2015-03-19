@@ -48,6 +48,7 @@ void monitorLauncher::run(){
   handler->handlerRun();
 }
 
+/* destructor */
 monitorLauncher::~monitorLauncher(){
   cout << "Parking lot monitor finished." << endl;
 }
