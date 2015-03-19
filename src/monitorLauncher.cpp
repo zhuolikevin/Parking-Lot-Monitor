@@ -14,6 +14,20 @@
 
 using namespace std;
 using namespace cv;
+
+bool checkSurround(Mat& inputMat, int j, int i){
+  int pointCounter = 0;
+  int vertiThreshold = 20;
+  int horiThreshold = 30;
+  for(int m=max(0,j-vertiThreshold);m<min(inputMat.rows,j+horiThreshold);m+=2){
+    for(int n=max(0,i-horiThreshold);n<min(inputMat.cols,i+horiThreshold);n+=2){
+      if(inputMat.at<unsigned char>(m,n) == 255){
+        pointCounter++; 
+      }
+    }
+  }
+  return true ?(pointCounter >= 350):false;
+}
  
 int main(int argc, char* argv[]){
 
@@ -42,7 +56,7 @@ int main(int argc, char* argv[]){
   Mat bkGrayMat;
   Mat frGrayMat;
 
-  Mat d1, d2, motionMat;
+  //Mat d1, d2, motionMat;
 
   // Erode kernel
   Mat kernel_ero = getStructuringElement(MORPH_RECT, Size(2,2));
@@ -57,23 +71,25 @@ int main(int argc, char* argv[]){
     cvtColor(FrameMat, curGrayMat, CV_BGR2GRAY);
     absdiff(curGrayMat, bkGrayMat, frGrayMat);
     threshold(frGrayMat, frGrayMat, 35, 255, CV_THRESH_BINARY);
-    imshow("motion", frGrayMat);
+    //imshow("motion", frGrayMat);
     //imshow("next", bkGrayMat);
     int number_of_changes = 0;
-    int min_x = motionMat.cols, max_x = 0;
-    int min_y = motionMat.rows, max_y = 0;
+    int min_x = frGrayMat.cols, max_x = 0;
+    int min_y = frGrayMat.rows, max_y = 0;
     // loop over image and detect changes
-    for(int j = 0; j < motionMat.rows; j+=2){ // height
-      for(int i = 0; i < motionMat.cols; i+=2){ // width
+    for(int j = 0; j < frGrayMat.rows; j+=2){ // height
+      for(int i = 0; i < frGrayMat.cols; i+=2){ // width
         // check if at pixel (j,i) intensity is equal to 255
         // this means that the pixel is different in the sequence
         // of images (prev_frame, current_frame, next_frame)
-        if(motionMat.at<unsigned char>(j,i) == 255){
-            number_of_changes++;
-            if(min_x>i) min_x = i;
-            if(max_x<i) max_x = i;
-            if(min_y>j) min_y = j;
-            if(max_y<j) max_y = j;
+        if(frGrayMat.at<unsigned char>(j,i) == 255){
+            if(checkSurround(frGrayMat, j, i)){
+              number_of_changes++;
+              if(min_x>i) min_x = i;
+              if(max_x<i) max_x = i;
+              if(min_y>j) min_y = j;
+              if(max_y<j) max_y = j;
+            }
         }
       }
     }
@@ -82,8 +98,8 @@ int main(int argc, char* argv[]){
       //check if not out of bounds
       if(min_x-10 > 0) min_x -= 10;
       if(min_y-10 > 0) min_y -= 10;
-      if(max_x+10 < motionMat.cols-1) max_x += 10;
-      if(max_y+10 < motionMat.rows-1) max_y += 10;
+      if(max_x+10 < frGrayMat.cols-1) max_x += 10;
+      if(max_y+10 < frGrayMat.rows-1) max_y += 10;
       // draw rectangle round the changed pixel
       Point x(min_x,min_y);
       Point y(max_x,max_y);
