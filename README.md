@@ -12,7 +12,7 @@ This is a simple application of parking lot monitor written in C++ based on Open
 
 ## A. Running Instruction ##
 
-The source codes are in `src/` directory and the testing video is in `res` directory. You can run the program as following:
+The source codes are in `src/` directory and the testing video is in `res/` directory. You can run the program as following:
 
 1.	enter `src/` directory.
 	
@@ -38,6 +38,18 @@ The source codes are in `src/` directory and the testing video is in `res` direc
 
 ## B. Structure of the Source Codes ##
 
+There are three .cpp files and three correspongding .h files in `src/` directory:
 
++	_motionDetector.cpp_ and _motionDetector.h_:
+	
+	These files contain the class for motion detection including getting the moving objects, deciding whether it is in the parking space, drawing, etc.
+
++	_frameHandler.cpp_ and _frameHandler.h_:
+	
+	These files contain the class for handling the video frame, including image processing like getting grayscale image, extracting foreground and background, etc.
+
++	_monitorLauncher.cpp_ and _monitorLauncher.h_:
+
+	These files are the entry of the application which uses the objects of other classes to run the program.
 
 
