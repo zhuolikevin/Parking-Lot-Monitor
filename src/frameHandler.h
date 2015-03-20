@@ -12,6 +12,8 @@
 #include <cv.h>
 #include <cxcore.h>
 #include <highgui.h>
+#include <ctime>
+#include <fstream>
 #include "motionDetector.h"
 
 using namespace cv;
@@ -24,9 +26,10 @@ private:
   Mat curGrayMat;
   Mat bkGrayMat;
   Mat frGrayMat;
+  ofstream logFile;
 public:
   frameHandler(VideoCapture& inputCapture);
-  //virtual ~frameHandler();
+  virtual ~frameHandler();
   void handlerRun();
   void getBackground();
   void getForeground();

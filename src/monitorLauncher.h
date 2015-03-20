@@ -19,13 +19,12 @@ using namespace std;
 
 class monitorLauncher{
 private:
-	VideoCapture capture;
+  VideoCapture capture;
 
 public:
-	monitorLauncher(char* inputVideo);
-	virtual ~monitorLauncher();
-	void run();
-	//bool checkSurround(Mat& inputMat, int j, int i);
+  monitorLauncher(char* inputVideo);
+  virtual ~monitorLauncher();
+  void run();
 };
 
 #endif  

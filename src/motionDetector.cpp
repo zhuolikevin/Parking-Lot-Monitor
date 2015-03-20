@@ -7,6 +7,7 @@
  **************************************************/
 #include "motionDetector.h"
 
+/* constructor */
 motionDetector::motionDetector(Mat& frameMat, Mat& grayMat, int xmin, int xmax, int ymin, int ymax){
   originMat = frameMat;
   workingMat = grayMat;
@@ -16,6 +17,7 @@ motionDetector::motionDetector(Mat& frameMat, Mat& grayMat, int xmin, int xmax, 
   max_y = ymax;
 }
 
+/* locate the moving object */
 void motionDetector::locateMotion(){
   // loop over image and detect changes
   for(int j = 0; j < workingMat.rows; j+=2){ // height
@@ -33,23 +35,47 @@ void motionDetector::locateMotion(){
   }
 }
 
+/* check surrounding, only when there are enough surroungding moving pixels will this be the object*/
 bool motionDetector::checkSurround(int j, int i){
   int pointCounter = 0;
-  int vertiThreshold = 20;
-  int horiThreshold = 30;
-  for(int m=max(0,j-vertiThreshold);m<min(workingMat.rows,j+horiThreshold);m+=2){
-   	for(int n=max(0,i-horiThreshold);n<min(workingMat.cols,i+horiThreshold);n+=2){
+  for(int m=max(0,j-VERTITHRESHOLD);m<min(workingMat.rows,j+VERTITHRESHOLD);m+=2){
+   	for(int n=max(0,i-HORITHRESHOLD);n<min(workingMat.cols,i+HORITHRESHOLD);n+=2){
       if(workingMat.at<unsigned char>(m,n) == 255){
         pointCounter++; 
       }
     }
   }
-  return true ?(pointCounter >= 350):false;
+  return true ?(pointCounter >= SURRTHRESHOLD):false;
 }
 
+/* find out if the moving object is in the parking space */
+bool motionDetector::checkOccupied(Point vertex1, Point vertex2, Point vertex3, Point vertex4){
+  //cout << "(" << centerP.x << "," << centerP.y << ")" << endl;
+  if(((centerP.x - vertex3.x) * (vertex4.y - vertex3.y) + (vertex4.x - vertex3.x) * vertex3.y \
+  	   >= centerP.y * (vertex4.x - vertex3.x)) && \
+  	 ((centerP.x - vertex1.x) * (vertex2.y - vertex1.y) + (vertex2.x - vertex1.x) * vertex1.y \
+  	   <= centerP.y * (vertex2.x - vertex1.x)) && \
+  	 ((centerP.x - vertex3.x) * (vertex1.y - vertex3.y) + (vertex1.x - vertex3.x) * vertex3.y \
+  	   <= centerP.y * (vertex1.x - vertex3.x)) && \
+  	 ((centerP.x - vertex4.x) * (vertex2.y - vertex4.y) + (vertex2.x - vertex4.x) * vertex4.y \
+  	   >= centerP.y * (vertex2.x - vertex4.x)) && \
+  	 (centerP.x != workingMat.cols/2 && centerP.y != workingMat.rows/2)){
+  	return true;
+  }else{
+  	return false;
+  }
+}
+
+/* draw the center and a rectangle for the moving object */
 void motionDetector::objectDrawing(){
-  Point x(min_x,min_y);
-  Point y(max_x,max_y);
-  Rect rect(x,y);
-  rectangle(originMat,rect,Scalar(0,255,255),5);
+  centerP.x = (min_x + max_x) / 2;
+  centerP.y = (min_y + max_y) / 2;
+  if (centerP.x != workingMat.cols/2 && centerP.y != workingMat.rows/2){
+  	circle(originMat, centerP, 1, Scalar(0,255,0), 5);
+
+  	Point x(min_x,min_y);
+  	Point y(max_x,max_y);
+  	Rect rect(x,y);
+  	rectangle(originMat,rect,Scalar(0,255,255),5);
+  }
 }
