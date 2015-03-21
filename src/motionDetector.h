@@ -24,8 +24,8 @@ class motionDetector{
 private:
   Mat originMat;          //original image matrix for drawing
   Mat workingMat;         //detecting image matrix
-  int min_x, max_x; 	  //detected object range in x	
-  int min_y, max_y;		  //detected object range in y
+  int min_x, max_x; 	    //detected object range in x	
+  int min_y, max_y;		    //detected object range in y
   Point centerP;          //the center of detected object
 public:
   motionDetector(Mat& frameMat, Mat& grayMat, int xmin, int xmax, int ymin, int ymax);

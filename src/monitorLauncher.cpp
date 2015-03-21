@@ -45,6 +45,7 @@ void monitorLauncher::run(){
   // new a frameHandler object to handle the frame
   frameHandler *handler = new frameHandler(capture);
   handler->getBackground();
+  handler->detectMouse();
   handler->handlerRun();
 }
 

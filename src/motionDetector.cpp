@@ -60,7 +60,7 @@ bool motionDetector::checkOccupied(Point vertex1, Point vertex2, Point vertex3, 
   	 ((centerP.x - vertex4.x) * (vertex2.y - vertex4.y) + (vertex2.x - vertex4.x) * vertex4.y \
   	   >= centerP.y * (vertex2.x - vertex4.x)) && \
   	 (centerP.x != workingMat.cols/2 && centerP.y != workingMat.rows/2)){
-  	return true;
+    return true;
   }else{
   	return false;
   }
