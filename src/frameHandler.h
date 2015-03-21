@@ -27,12 +27,14 @@ private:
   Mat bkGrayMat;
   Mat frGrayMat;
   ofstream logFile;
+  vector<Point> parkingPoint;
 public:
   frameHandler(VideoCapture& inputCapture);
   virtual ~frameHandler();
   void handlerRun();
   void getBackground();
   void getForeground();
+  void detectMouse();
 };
 
 #endif 

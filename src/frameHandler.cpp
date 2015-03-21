@@ -6,6 +6,7 @@
  * Last Update: 
  **************************************************/
 #include "frameHandler.h"
+#include "mouseDetector.h"
 
 /* constructor */
 frameHandler::frameHandler(VideoCapture& inputCapture){
@@ -37,22 +38,27 @@ void frameHandler::handlerRun(){
   clock_t unoccupiedStart = clock();
   clock_t occupiedStart;
 
+  parkingPoint = mouseDetector::getPoint();
+
+  // Here we temporarily use fixed parking space
+  Point pt1(325, 368);
+  Point pt2(680, 115);
+  Point pt3(532, 460);
+  Point pt4(876, 183);
+
   while(capture.read(FrameMat)){
   	// get the foreground (the motion objects)
 	getForeground();
 
-	// Here we temporarily use fixed parking space
-    Point pt1(325, 368);
-    Point pt2(680, 115);
-    Point pt3(532, 460);
-    Point pt4(876, 183);
+
 
 	motionDetector *detector = new motionDetector(FrameMat, frGrayMat, frGrayMat.cols, 0, frGrayMat.rows, 0);
 	
 	detector->locateMotion();
 	detector->objectDrawing();
-	if (detector->checkOccupied(pt1, pt2, pt3, pt4)){
-	  if(!statusFlag){       // this is the parking into transition
+	//if (detector->checkOccupied(pt1, pt2, pt3, pt4)){
+	if (detector->checkOccupied(parkingPoint.at(0), parkingPoint.at(1), parkingPoint.at(2), parkingPoint.at(3))){
+    if(!statusFlag){       // this is the parking into transition
 	  	statusFlag = true;
 	  	occupiedStart = clock();
 	  	double vacDuration = (clock() - unoccupiedStart) / (double) CLOCKS_PER_SEC;
@@ -78,10 +84,10 @@ void frameHandler::handlerRun(){
 	}
 
     // highlight the parking lot area
-    line(FrameMat, pt1, pt2, Scalar(255,0,0), 5);
-    line(FrameMat, pt1, pt3, Scalar(255,0,0), 5);
-    line(FrameMat, pt3, pt4, Scalar(255,0,0), 5);
-    line(FrameMat, pt2, pt4, Scalar(255,0,0), 5);
+    line(FrameMat, parkingPoint.at(0), parkingPoint.at(1), Scalar(255,0,0), 5);
+    line(FrameMat, parkingPoint.at(0), parkingPoint.at(2), Scalar(255,0,0), 5);
+    line(FrameMat, parkingPoint.at(2), parkingPoint.at(3), Scalar(255,0,0), 5);
+    line(FrameMat, parkingPoint.at(1), parkingPoint.at(3), Scalar(255,0,0), 5);
 
     // show the frame
     imshow("Vedio", FrameMat); 
@@ -107,4 +113,13 @@ void frameHandler::getForeground(){
   cvtColor(FrameMat, curGrayMat, CV_BGR2GRAY);
   absdiff(curGrayMat, bkGrayMat, frGrayMat);
   threshold(frGrayMat, frGrayMat, 35, 255, CV_THRESH_BINARY);
+}
+
+void frameHandler::detectMouse(){
+  cout << "Please select the parking space with 4 clicks..." << endl;
+  mouseDetector::setMat(FrameMat);
+  namedWindow("parkingSpaceSelection", CV_WINDOW_AUTOSIZE);
+  setMouseCallback("parkingSpaceSelection", mouseDetector::onMouse, 0);
+  imshow("parkingSpaceSelection", mouseDetector::workingMat);
+  waitKey(0);
 }
