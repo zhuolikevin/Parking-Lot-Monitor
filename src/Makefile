@@ -8,13 +8,16 @@ CFLAGS = -Wall -g -I/usr/local/include/opencv -I/usr/local/include/opencv2 -L/us
 
 all: parkMonitor
 
-parkMonitor: motionDetector.o frameHandler.o monitorLauncher.o
-	g++ -o parkMonitor motionDetector.o frameHandler.o monitorLauncher.o ${CFLAGS}
+parkMonitor: motionDetector.o frameHandler.o monitorLauncher.o mouseDetector.o
+	g++ -o parkMonitor motionDetector.o frameHandler.o monitorLauncher.o mouseDetector.o ${CFLAGS}
+
+mouseDetector.o: mouseDetector.cpp mouseDetector.h
+	g++ -c mouseDetector.cpp ${CFLAGS}
 
 motionDetector.o: motionDetector.cpp motionDetector.h
 	g++ -c motionDetector.cpp ${CFLAGS}
 
-frameHandler.o: frameHandler.cpp frameHandler.h motionDetector.h
+frameHandler.o: frameHandler.cpp frameHandler.h motionDetector.h mouseDetector.h
 	g++ -c frameHandler.cpp ${CFLAGS}
 
 monitorLauncher.o: monitorLauncher.cpp monitorLauncher.h frameHandler.h
