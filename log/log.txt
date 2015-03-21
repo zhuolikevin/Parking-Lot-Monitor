@@ -1,9 +1,9 @@
-Vacant time from Thu Mar 19 22:40:42 2015
- to Thu Mar 19 22:41:01 2015
-Duration: 12.62s
-Occupied time from Thu Mar 19 22:41:01 2015
- to Thu Mar 19 22:41:11 2015
-Duration: 6.76s
-Vacant time from Thu Mar 19 22:41:11 2015
- to Thu Mar 19 22:41:23 2015
-Duration: 7.78s
+Vacant time from Sat Mar 21 12:54:33 2015
+ to Sat Mar 21 12:54:54 2015
+Duration: 14.98s
+Occupied time from Sat Mar 21 12:54:54 2015
+ to Sat Mar 21 12:55:05 2015
+Duration: 7.7s
+Vacant time from Sat Mar 21 12:55:05 2015
+ to Sat Mar 21 12:55:18 2015
+Duration: 8.87s
