@@ -30,7 +30,9 @@ The source codes are in `src/` directory and the testing video is in `res/` dire
 
 		$ ./parkMonitor parking.avi
 
-	Then you can see the car parking video. The blue line segments composed an area which records the parking space.(Currently we just define the space, and the later version should support an interface for user to define the space at the initialization stage) The yellow rectangle highlights the moving car and the green point is the center of the car.
+5. 	click four points for the detecting parking area, current verison only support a certain clicking sequence.  
+
+	Then you can see the car parking video. The blue line segments composed an area which records the parking space you choose. The yellow rectangle highlights the moving car and the green point is the center of the car.
 
 5.	you can use your text editro to see the result log file.
 
@@ -48,8 +50,13 @@ There are three .cpp files and three correspongding .h files in `src/` directory
 	
 	These files contain the class for handling the video frame, including image processing like getting grayscale image, extracting foreground and background, etc.
 
++	_mouseDetector.cpp_ and _mouseDetector.h_:
+	
+	These files contain the class for handling mouse clicking during the initialization phase where user should select the area they are interested in.
+
 +	_monitorLauncher.cpp_ and _monitorLauncher.h_:
 
 	These files are the entry of the application which uses the objects of other classes to run the program.
+
 
 
