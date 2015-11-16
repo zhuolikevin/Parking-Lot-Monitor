@@ -59,4 +59,6 @@ There are three .cpp files and three correspongding .h files in `src/` directory
 	These files are the entry of the application which uses the objects of other classes to run the program.
 
 
+## C. Running Preview ##
 
+![alt tag](https://github.com/zhuolikevin/parkMonitor/blob/master/img/preview.jpg)
