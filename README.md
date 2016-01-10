@@ -1,12 +1,12 @@
-# parkMonitor #
+# Parkinglot Monitor #
 
-> Application Name: parkMonitor
+> Application Name: Parkinglot Monitor
 
 > Author Name: Zhuo Li (Kevin)
 
 > Platform: Ubuntu Linux 12.04
  
-> Late Updated: 
+> Late Updated: March 21st, 2015
 
 This is a simple application of parking lot monitor written in C++ based on OpenCV. It can read from the video file (can be replaced by camera) and decide the time period during which the parking space is occupied or not. The detected motion vehicle and parking space are highlighted in windows during the program running. A log file which record the parking lot information is saved.
 
